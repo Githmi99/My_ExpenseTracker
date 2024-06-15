@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import styled from "styled-components";
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import bg from './img/bg.png';
 import { MainLayout } from './styles/Layouts';
 import Orb from './Components/Orb/Orb';
@@ -9,6 +10,7 @@ import Income from './Components/Income/Income';
 import Expenses from './Components/Expenses/Expenses';
 import { useGlobalContext } from './context/globalContext';
 import Login from './Components/Login';
+import Register from './Components/Register'; // Import the Register component
 
 function App() {
   const [active, setActive] = useState(1);
@@ -38,17 +40,31 @@ function App() {
 
   const handleLogin = (token) => {
     setIsAuthenticated(true);
+    localStorage.setItem('token', token);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('token');
   };
 
   return (
     <AppStyled bg={bg} className="App">
       {!isAuthenticated ? (
-        <Login onLogin={handleLogin} />
+        <Router>
+          <Routes>
+            <Route path="/register" element={<Register onRegister={handleLogin} />} />
+            <Route path="/" element={<Login onLogin={handleLogin} />} />
+          </Routes>
+          <nav>
+            <Link to="/">Login</Link> | <Link to="/register">Register</Link>
+          </nav>
+        </Router>
       ) : (
         <>
           {orbMemo}
           <MainLayout>
-            <Navigation active={active} setActive={setActive} />
+            <Navigation active={active} setActive={setActive} handleLogout={handleLogout} />
             <main>
               {displayData()}
             </main>
